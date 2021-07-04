@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  loading_indicator: ^2.1.1
+  nanoid: ^1.0.0
 
 dev_dependencies:
   flutter_test:

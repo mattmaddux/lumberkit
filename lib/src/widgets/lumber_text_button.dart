@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:nanoid/nanoid.dart';
 
-class LumberButton extends StatefulWidget {
+class LumberTextButton extends StatefulWidget {
   final String label;
   final void Function() onPressed;
-  final double? height;
-  final double? width;
   final Color? color;
   final TextStyle? textStyle;
   final EdgeInsetsGeometry? padding;
@@ -15,12 +13,10 @@ class LumberButton extends StatefulWidget {
   final bool loading;
   final String? heroTag;
 
-  LumberButton({
+  LumberTextButton({
     Key? key,
     required this.label,
     required this.onPressed,
-    this.height,
-    this.width,
     this.color = Colors.blueAccent,
     this.textStyle = const TextStyle(
       color: Colors.white,
@@ -34,10 +30,10 @@ class LumberButton extends StatefulWidget {
     this.heroTag,
   }) : super(key: key);
 
-  _LumberButton createState() => _LumberButton();
+  _LumberTextButton createState() => _LumberTextButton();
 }
 
-class _LumberButton extends State<LumberButton>
+class _LumberTextButton extends State<LumberTextButton>
     with SingleTickerProviderStateMixin {
   Animation<double>? animation;
   AnimationController? controller;
@@ -64,21 +60,24 @@ class _LumberButton extends State<LumberButton>
       ..addListener(() => setState(() {}));
   }
 
-  Widget getChild() {
+  Widget getChild(BuildContext context) {
     if (widget.loading) {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 100, vertical: 10),
         child: LoadingIndicator(
           indicatorType: Indicator.ballPulse,
-          color: Colors.white,
+          color: widget.color,
         ),
       );
     }
+    TextStyle style = widget.textStyle ??
+        Theme.of(context).textTheme.bodyText1 ??
+        TextStyle();
     return Center(
       child: Text(
         widget.label,
-        textAlign: TextAlign.center,
-        style: widget.textStyle,
+        style:
+            widget.color == null ? style : style.copyWith(color: widget.color),
       ),
     );
   }
@@ -94,16 +93,8 @@ class _LumberButton extends State<LumberButton>
         child: Hero(
           tag: widget.heroTag ?? nanoid(6),
           child: Container(
-            width: widget.width,
-            height: widget.height,
             padding: widget.padding,
-            decoration: BoxDecoration(
-              borderRadius: widget.borderRadius != null
-                  ? BorderRadius.circular(widget.borderRadius!)
-                  : null,
-              color: widget.color,
-            ),
-            child: getChild(),
+            child: getChild(context),
           ),
         ),
       ),
