@@ -9,3 +9,5 @@ export 'src/widgets/lumber_field.dart';
 export 'src/widgets/lumber_pad.dart';
 export 'src/widgets/auto_image.dart';
 export 'src/widgets/stateful_wrapper.dart';
+export 'src/widgets/cross_fade.dart';
+export 'src/utilities/generator.dart';
