@@ -12,6 +12,9 @@ dependencies:
     sdk: flutter
   loading_indicator: ^2.1.1
   nanoid: ^1.0.0
+  font_awesome_flutter:
+    git:
+      url: git@github.com:mattmaddux/font_awesome_flutter_pro.git
 
 dev_dependencies:
   flutter_test:
