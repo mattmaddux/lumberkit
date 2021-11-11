@@ -54,6 +54,12 @@ class LumberIcon extends StatelessWidget {
           primaryColor: primaryColor,
           secondaryColor: secondaryColor,
         );
+      case LumberIconType.other:
+        return Icon(
+          IconData(data.code, fontFamily: data.fontFamily),
+          size: size,
+          color: primaryColor,
+        );
     }
   }
 }

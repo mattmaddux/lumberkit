@@ -15,7 +15,9 @@ class LumberButton extends StatefulWidget {
   final double? minimumScale;
   final bool loading;
   final String? heroTag;
-  final TextAlign? textAlign;
+  final EdgeInsetsGeometry externalPadding;
+  final EdgeInsetsGeometry internalPadding;
+  final AlignmentGeometry alignment;
 
   LumberButton({
     Key? key,
@@ -35,7 +37,9 @@ class LumberButton extends StatefulWidget {
     this.minimumScale = 0.98,
     this.loading = false,
     this.heroTag,
-    this.textAlign,
+    this.externalPadding = const EdgeInsets.all(0),
+    this.internalPadding = const EdgeInsets.all(0),
+    this.alignment = Alignment.center,
   }) : super(key: key);
 
   _LumberButton createState() => _LumberButton();
@@ -71,18 +75,17 @@ class _LumberButton extends State<LumberButton>
 
   Widget getChild() {
     if (widget.loading) {
-      return Container(
-        padding: EdgeInsets.symmetric(horizontal: 100, vertical: 10),
+      return Center(
         child: LoadingIndicator(
           indicatorType: Indicator.ballPulse,
           color: Colors.white,
         ),
       );
     }
-    return Center(
+    return Padding(
+      padding: widget.internalPadding,
       child: Text(
         widget.label,
-        textAlign: widget.textAlign ?? TextAlign.center,
         style: widget.textStyle,
       ),
     );
@@ -96,30 +99,34 @@ class _LumberButton extends State<LumberButton>
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovering = true),
-      onExit: (_) => setState(() => _hovering = false),
-      child: GestureDetector(
-        onTapDown: (_) => controller!.forward(),
-        onTapUp: (_) => controller!.reverse(),
-        onTap: widget.onPressed,
-        child: Transform.scale(
-          scale: animation!.value,
-          child: Hero(
-            tag: widget.heroTag ?? nanoid(6),
-            child: Container(
-              width: widget.width,
-              height: widget.height,
-              padding: widget.padding,
-              decoration: BoxDecoration(
-                borderRadius: widget.borderRadius != null
-                    ? BorderRadius.circular(widget.borderRadius!)
-                    : null,
-                color: (_hovering && widget.hoverColor != null)
-                    ? widget.hoverColor!
-                    : widget.color!,
+    return Padding(
+      padding: widget.externalPadding,
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hovering = true),
+        onExit: (_) => setState(() => _hovering = false),
+        child: GestureDetector(
+          onTapDown: (_) => controller!.forward(),
+          onTapUp: (_) => controller!.reverse(),
+          onTap: widget.onPressed,
+          child: Transform.scale(
+            scale: animation!.value,
+            child: Hero(
+              tag: widget.heroTag ?? nanoid(6),
+              child: Container(
+                alignment: widget.alignment,
+                width: widget.width,
+                height: widget.height,
+                padding: widget.padding,
+                decoration: BoxDecoration(
+                  borderRadius: widget.borderRadius != null
+                      ? BorderRadius.circular(widget.borderRadius!)
+                      : null,
+                  color: (_hovering && widget.hoverColor != null)
+                      ? widget.hoverColor!
+                      : widget.color!,
+                ),
+                child: getChild(),
               ),
-              child: getChild(),
             ),
           ),
         ),

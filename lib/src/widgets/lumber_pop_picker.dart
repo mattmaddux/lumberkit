@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import 'package:lumberkit/lumberkit.dart';
@@ -7,13 +9,19 @@ class LumberPopOption {
   final int index;
   final LumberIconData? icon;
   final String? title;
-  final Function() onSelect;
+  final TextStyle Function(TextStyle)? titleStyleOverrides;
+  final bool isDirectory;
+  final String Function()? onNewPath;
+  final Function()? onSelect;
 
   LumberPopOption({
     required this.index,
     this.icon,
     this.title,
-    required this.onSelect,
+    this.titleStyleOverrides,
+    this.isDirectory = false,
+    this.onNewPath,
+    this.onSelect,
   });
 }
 
@@ -43,6 +51,18 @@ class LumberPopPicker extends StatelessWidget {
     this.textAlign,
   }) : super(key: key);
 
+  double calcPopUpHeight() {
+    if (popUpHeight != null) {
+      return popUpHeight!;
+    }
+    int count = options.length;
+    if (scrolling) {
+      count = min<int>(count, 5);
+    }
+
+    return count * 50.0;
+  }
+
   @override
   Widget build(BuildContext context) {
     List<LumberPopOption> options = this.options;
@@ -52,7 +72,7 @@ class LumberPopPicker extends StatelessWidget {
       borderRadius: 8,
       childBuilder: builder,
       popUpWidth: this.popUpWidth,
-      popUpHeight: this.popUpHeight,
+      popUpHeight: calcPopUpHeight(),
       popUpBuilder: (context, onDismiss) {
         return LumberPickerStack(
           foregroundColor: foregroundColor,
@@ -61,7 +81,7 @@ class LumberPopPicker extends StatelessWidget {
           scrolling: scrolling,
           textAlign: textAlign,
           onSelect: (option) {
-            option.onSelect();
+            option.onSelect?.call();
             onDismiss();
           },
           options: options,

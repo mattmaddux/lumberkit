@@ -1,31 +1,90 @@
 import 'package:flutter/material.dart';
+import 'package:lumberkit/src/widgets/simple_arrow.dart';
 
 enum LumberPopOrientation {
+  top,
+  topRight,
+  topLeft,
   bottom,
   bottomRight,
   bottomLeft,
 }
 
+extension LumberPopOrientationExtenon on LumberPopOrientation {
+  bool get top =>
+      this == LumberPopOrientation.top ||
+      this == LumberPopOrientation.topRight ||
+      this == LumberPopOrientation.topLeft;
+  bool get bottom =>
+      this == LumberPopOrientation.bottom ||
+      this == LumberPopOrientation.bottomRight ||
+      this == LumberPopOrientation.bottomLeft;
+
+  bool get right =>
+      this == LumberPopOrientation.topRight ||
+      this == LumberPopOrientation.bottomRight;
+  bool get left =>
+      this == LumberPopOrientation.topLeft ||
+      this == LumberPopOrientation.bottomLeft;
+  bool get center =>
+      this == LumberPopOrientation.bottom || this == LumberPopOrientation.top;
+
+  Alignment get arrowAlignment {
+    switch (this) {
+      case LumberPopOrientation.top:
+        return Alignment.bottomCenter;
+      case LumberPopOrientation.topRight:
+        return Alignment.bottomLeft;
+      case LumberPopOrientation.topLeft:
+        return Alignment.bottomRight;
+      case LumberPopOrientation.bottom:
+        return Alignment.topCenter;
+      case LumberPopOrientation.bottomRight:
+        return Alignment.topLeft;
+      case LumberPopOrientation.bottomLeft:
+        return Alignment.topRight;
+    }
+  }
+
+  ArrowDirection get arrowDirection {
+    switch (this) {
+      case LumberPopOrientation.top:
+      case LumberPopOrientation.topRight:
+      case LumberPopOrientation.topLeft:
+        return ArrowDirection.down;
+      case LumberPopOrientation.bottom:
+      case LumberPopOrientation.bottomRight:
+      case LumberPopOrientation.bottomLeft:
+        return ArrowDirection.up;
+    }
+  }
+}
+
 class LumberPopButton extends StatefulWidget {
-  final Widget Function(BuildContext, Function(), Function()) childBuilder;
+  final Widget Function(BuildContext, Function() open, Function() close)
+      childBuilder;
   final Widget Function(BuildContext, Function()) popUpBuilder;
   final double popUpWidth;
-  final double? popUpHeight;
+  final double popUpHeight;
   final Color? popUpColor;
   final double? borderRadius;
   final bool clickAwayDismissable;
-  final LumberPopOrientation orientation;
+  final LumberPopOrientation? orientation;
+  final double arrowSize;
+  final double padding;
 
   const LumberPopButton({
     Key? key,
     required this.childBuilder,
     required this.popUpBuilder,
-    this.popUpHeight,
+    required this.popUpHeight,
     required this.popUpWidth,
     this.popUpColor,
     this.borderRadius,
     this.clickAwayDismissable = true,
-    this.orientation = LumberPopOrientation.bottom,
+    this.orientation,
+    this.arrowSize = 16,
+    this.padding = 8,
   }) : super(key: key);
 
   @override
@@ -38,6 +97,7 @@ class _LumberPopButtonState extends State<LumberPopButton> {
   OverlayEntry? _overlayEntry;
   Size? widgetSize;
   Offset? widgetPosition;
+  LumberPopOrientation? orientation;
   bool showing = false;
   late OverlayEntry _dismissOverlay = OverlayEntry(
     builder: (context) {
@@ -50,81 +110,129 @@ class _LumberPopButtonState extends State<LumberPopButton> {
     },
   );
 
+  void getOrientation() {
+    if (widget.orientation != null) {
+      orientation = widget.orientation!;
+    }
+
+    double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
+    double leftSpace = widgetPosition!.dx;
+    double rightSpace = width - (widgetPosition!.dx + widgetSize!.width);
+    double topSpace = widgetPosition!.dy;
+    double bottomSpace = height - (widgetPosition!.dy + widgetSize!.height);
+
+    if (bottomSpace > topSpace) {
+      if (leftSpace < widget.popUpWidth / 2) {
+        orientation = LumberPopOrientation.bottomRight;
+      } else if (rightSpace < widget.popUpWidth / 2) {
+        orientation = LumberPopOrientation.bottomLeft;
+      } else {
+        orientation = LumberPopOrientation.bottom;
+      }
+    } else {
+      if (leftSpace < widget.popUpWidth / 2) {
+        orientation = LumberPopOrientation.topRight;
+      } else if (rightSpace < widget.popUpWidth / 2) {
+        orientation = LumberPopOrientation.topLeft;
+      } else {
+        orientation = LumberPopOrientation.top;
+      }
+    }
+  }
+
   void findButton() {
     RenderBox? renderBox =
         _key.currentContext?.findRenderObject() as RenderBox?;
     widgetSize = renderBox?.size;
     widgetPosition = renderBox?.localToGlobal(Offset.zero);
+    getOrientation();
+  }
+
+  double calcTop() {
+    if (orientation!.bottom) return widgetPosition!.dy + widgetSize!.height;
+    return widgetPosition!.dy - widget.popUpHeight - widget.arrowSize;
   }
 
   double calcLeft() {
-    switch (widget.orientation) {
-      case LumberPopOrientation.bottom:
-        double diff = widgetSize!.width - widget.popUpWidth;
-        return widgetPosition!.dx + (diff / 2);
-      case LumberPopOrientation.bottomRight:
-        return widgetPosition!.dx;
-      case LumberPopOrientation.bottomLeft:
-        double diff = widgetSize!.width - widget.popUpWidth;
-        return widgetPosition!.dx + diff;
+    if (orientation!.center) {
+      double diff = widgetSize!.width - widget.popUpWidth;
+      return widgetPosition!.dx + (diff / 2);
     }
+    if (orientation!.left) {
+      double diff = widgetSize!.width - widget.popUpWidth;
+      return widgetPosition!.dx + diff;
+    }
+    return widgetPosition!.dx;
   }
 
-  Alignment get arrowAlignment {
+  double calcArrowPadding() => widgetSize!.width / 2 - widget.arrowSize / 2;
+
+  EdgeInsetsGeometry getMainBodyPadding() {
     switch (widget.orientation) {
       case LumberPopOrientation.bottom:
-        return Alignment.topCenter;
-      case LumberPopOrientation.bottomRight:
-        return Alignment.topLeft;
       case LumberPopOrientation.bottomLeft:
-        return Alignment.topRight;
+      case LumberPopOrientation.bottomRight:
+        return EdgeInsets.only(top: widget.arrowSize);
+      default:
+        return EdgeInsets.only(bottom: widget.arrowSize);
     }
   }
 
   OverlayEntry? _overlay() {
-    if (widgetSize == null || widgetPosition == null) return null;
+    if (widgetSize == null || widgetPosition == null || orientation == null)
+      return null;
     return OverlayEntry(
       builder: (context) {
         return Positioned(
-          top: widgetPosition!.dy + widgetSize!.height,
+          top: calcTop(),
           left: calcLeft(),
           width: widget.popUpWidth,
-          height: widget.popUpHeight,
+          height: widget.popUpHeight + (widget.arrowSize / 2) + widget.padding,
           child: Material(
             color: Colors.transparent,
-            child: Stack(
-              children: [
-                Align(
-                  alignment: arrowAlignment,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: ClipPath(
-                      clipper: ArrowClipper(),
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: orientation!.bottom ? widget.padding : 0,
+                bottom: orientation!.top ? widget.padding : 0,
+              ),
+              child: Stack(
+                children: [
+                  Align(
+                    alignment: orientation!.arrowAlignment,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: calcArrowPadding(),
+                      ),
+                      child: SimpleArrow(
+                        direction: orientation!.arrowDirection,
+                        size: widget.arrowSize,
+                        color: widget.popUpColor ?? Colors.white,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      top: orientation!.bottom ? (widget.arrowSize / 2) : 0,
+                      bottom: orientation!.top ? (widget.arrowSize / 2) : 0,
+                    ),
+                    child: ClipRRect(
+                      borderRadius:
+                          BorderRadius.circular(widget.borderRadius ?? 0),
                       child: Container(
-                        width: 17,
-                        height: 17,
-                        color: widget.popUpColor ?? Colors.white,
+                        width: widget.popUpWidth,
+                        height: widget.popUpHeight,
+                        decoration: BoxDecoration(
+                          color: widget.popUpColor ?? Colors.white,
+                          // borderRadius:
+                          //     BorderRadius.circular(widget.borderRadius ?? 0),
+                        ),
+                        child: widget.popUpBuilder(context, dismiss),
                       ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 15.0),
-                  child: ClipRRect(
-                    borderRadius:
-                        BorderRadius.circular(widget.borderRadius ?? 0),
-                    child: Container(
-                      width: widget.popUpWidth,
-                      decoration: BoxDecoration(
-                        color: widget.popUpColor ?? Colors.white,
-                        // borderRadius:
-                        //     BorderRadius.circular(widget.borderRadius ?? 0),
-                      ),
-                      child: widget.popUpBuilder(context, dismiss),
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
@@ -163,21 +271,5 @@ class _LumberPopButtonState extends State<LumberPopButton> {
       key: _key,
       child: widget.childBuilder(context, show, dismiss),
     );
-  }
-}
-
-class ArrowClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    Path path = Path();
-    path.moveTo(0, size.height);
-    path.lineTo(size.width / 2, size.height / 2);
-    path.lineTo(size.width, size.height);
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) {
-    return true;
   }
 }

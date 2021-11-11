@@ -22,6 +22,12 @@ class LumberField extends StatelessWidget {
   final TextStyle? hintStyle;
   final String? heroTag;
   final bool autofocus;
+  final double? width;
+  final double? height;
+  final double? borderRadius;
+  final TextAlign? textAlign;
+  final EdgeInsetsGeometry? externalPadding;
+  final EdgeInsetsGeometry? internalPadding;
 
   LumberField({
     Key? key,
@@ -45,18 +51,26 @@ class LumberField extends StatelessWidget {
     this.style,
     this.hintStyle,
     this.heroTag,
+    this.width,
+    this.height,
+    this.borderRadius = 20,
+    this.externalPadding,
+    this.internalPadding,
+    this.textAlign,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: externalPadding ?? const EdgeInsets.all(0),
       child: Hero(
         tag: heroTag ?? nanoid(6),
         child: Container(
-          padding: EdgeInsets.all(8.0),
+          width: width,
+          height: height,
+          padding: internalPadding ?? const EdgeInsets.all(0),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(20)),
+            borderRadius: BorderRadius.all(Radius.circular(borderRadius ?? 0)),
             color: backgroundColor,
             border: borderColor != null
                 ? Border.all(
@@ -65,27 +79,30 @@ class LumberField extends StatelessWidget {
                   )
                 : null,
           ),
-          child: TextFormField(
-            autofocus: autofocus,
-            maxLength: maxLength,
-            style: style,
-            initialValue: initialValue,
-            onChanged: onEdit,
-            onSaved: onSaved,
-            onFieldSubmitted: onSubmitted,
-            validator: validator,
-            textCapitalization: textCapitalization,
-            maxLines: large ? null : 1,
-            minLines: large ? 10 : null,
-            keyboardType: keyboardType,
-            obscureText: obscure,
-            cursorColor: activeColor,
-            decoration: InputDecoration(
-              contentPadding: EdgeInsets.all(12.0),
-              prefixIcon: icon != null ? Icon(icon) : null,
-              hintText: label,
-              hintStyle: hintStyle,
-              border: InputBorder.none,
+          child: Center(
+            child: TextFormField(
+              textAlignVertical: TextAlignVertical.center,
+              textAlign: textAlign ?? TextAlign.start,
+              autofocus: autofocus,
+              maxLength: maxLength,
+              style: style,
+              initialValue: initialValue,
+              onChanged: onEdit,
+              onSaved: onSaved,
+              onFieldSubmitted: onSubmitted,
+              validator: validator,
+              textCapitalization: textCapitalization,
+              maxLines: large ? null : 1,
+              minLines: large ? 10 : null,
+              keyboardType: keyboardType,
+              obscureText: obscure,
+              cursorColor: activeColor,
+              decoration: InputDecoration(
+                prefixIcon: icon != null ? Icon(icon) : null,
+                hintText: label,
+                hintStyle: hintStyle,
+                border: InputBorder.none,
+              ),
             ),
           ),
         ),

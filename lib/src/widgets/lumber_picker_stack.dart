@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+
 import 'package:lumberkit/lumberkit.dart';
 
 class LumberPickerStack extends StatefulWidget {
+  final Function(String)? onPathUpdate;
   final Function(LumberPopOption) onSelect;
   final Color? foregroundColor;
   final Color? selectedForegroundColor;
@@ -9,9 +11,11 @@ class LumberPickerStack extends StatefulWidget {
   final List<LumberPopOption> options;
   final bool scrolling;
   final TextAlign? textAlign;
+  final double? topPadding;
 
   const LumberPickerStack({
     Key? key,
+    this.onPathUpdate,
     required this.onSelect,
     this.foregroundColor,
     this.selectedForegroundColor,
@@ -19,6 +23,7 @@ class LumberPickerStack extends StatefulWidget {
     required this.options,
     required this.scrolling,
     this.textAlign,
+    this.topPadding,
   }) : super(key: key);
 
   @override
@@ -45,6 +50,11 @@ class _LumberPickerStackState extends State<LumberPickerStack> {
 
   Color secondaryColor(int index) => primaryColor(index).shade300;
 
+  TextStyle textStyle(int index) => Theme.of(context)
+      .textTheme
+      .subtitle1!
+      .copyWith(color: primaryColor(index));
+
   List<Widget> buildChildren() => widget.options.map(
         (option) {
           return InkWell(
@@ -56,7 +66,11 @@ class _LumberPickerStackState extends State<LumberPickerStack> {
               }
             },
             onTap: () {
-              widget.onSelect(option);
+              if (option.onNewPath != null) {
+                widget.onPathUpdate?.call(option.onNewPath!());
+              } else {
+                widget.onSelect(option);
+              }
             },
             child: Container(
               color: backgrondColor(option.index),
@@ -86,15 +100,29 @@ class _LumberPickerStackState extends State<LumberPickerStack> {
                       Expanded(
                         child: Text(
                           option.title!,
-                          style: Theme.of(context)
-                              .textTheme
-                              .subtitle1!
-                              .copyWith(color: primaryColor(option.index)),
+                          overflow: TextOverflow.ellipsis,
+                          style: option.titleStyleOverrides
+                                  ?.call(textStyle(option.index)) ??
+                              textStyle(option.index),
                           textAlign: widget.textAlign ??
                               ((option.icon == null)
                                   ? TextAlign.center
                                   : TextAlign.left),
                         ),
+                      ),
+                    if (option.onNewPath != null &&
+                        option.onSelect != null &&
+                        option.index == _hoverSelection)
+                      LumberButton(
+                        label: "Select",
+                        width: 70,
+                        borderRadius: 5,
+                        textStyle: Theme.of(context)
+                            .textTheme
+                            .bodyText1!
+                            .copyWith(color: Colors.white),
+                        color: primaryColor(option.index).shade700,
+                        onPressed: () => widget.onSelect(option),
                       ),
                   ],
                 ),
@@ -109,13 +137,14 @@ class _LumberPickerStackState extends State<LumberPickerStack> {
     List<LumberPopOption> options;
     options = widget.options;
     options.sort((a, b) => a.index.compareTo(b.index));
-    if (widget.scrolling)
+    if (widget.scrolling) {
       return Container(
         height: _cellHeight * widget.options.length,
         child: ListView(
           children: buildChildren(),
         ),
       );
+    }
 
     return Container(
       height: _cellHeight * widget.options.length,

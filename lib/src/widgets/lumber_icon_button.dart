@@ -71,25 +71,63 @@ class _LumberIconButtonState extends State<LumberIconButton> {
     return widget.backgroundColor;
   }
 
+  // @override
+  // Widget build(BuildContext context) {
+  //   return InkWell(
+  //     onHover: (hovering) => setState(() => _hovering = hovering),
+  //     onTapDown: (details) => setState(() => _pressed = true),
+  //     splashColor: Colors.transparent,
+  //     hoverColor: Colors.transparent,
+  //     focusColor: Colors.transparent,
+  //     highlightColor: Colors.transparent,
+  //     onTap: () {
+  //       setState(() => _pressed = false);
+  //       widget.onPressed();
+  //     },
+  //     child: Container(
+  //       decoration: BoxDecoration(
+  //         color: backgroundColor,
+  //         borderRadius: (widget.borderRadius != null)
+  //             ? BorderRadius.circular(widget.borderRadius!)
+  //             : null,
+  //       ),
+  //       width: widget.buttonSize,
+  //       height: widget.buttonSize,
+  //       child: Center(
+  //         child: LumberIcon(
+  //           data: widget.data,
+  //           size: widget.iconSize,
+  //           primaryColor: primaryColor,
+  //           secondaryColor: secondaryColor,
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onHover: (hovering) => setState(() => _hovering = hovering),
-      onTapDown: (details) => setState(() => _pressed = true),
-      onTap: () {
-        setState(() => _pressed = false);
-        widget.onPressed();
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: (widget.borderRadius != null)
-              ? BorderRadius.circular(widget.borderRadius!)
-              : null,
-        ),
-        width: widget.buttonSize,
-        height: widget.buttonSize,
-        child: Center(
+    return Container(
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: (widget.borderRadius != null)
+            ? BorderRadius.circular(widget.borderRadius!)
+            : null,
+      ),
+      width: widget.buttonSize,
+      height: widget.buttonSize,
+      child: Center(
+        child: InkWell(
+          onHover: (hovering) => setState(() => _hovering = hovering),
+          onTapDown: (details) => setState(() => _pressed = true),
+          splashColor: Colors.transparent,
+          hoverColor: Colors.transparent,
+          focusColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onTap: () {
+            setState(() => _pressed = false);
+            widget.onPressed();
+          },
           child: LumberIcon(
             data: widget.data,
             size: widget.iconSize,

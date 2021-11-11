@@ -3,7 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:lumberkit/lumberkit.dart';
 import 'package:lumberkit/src/widgets/lumber_icon_button.dart';
-import 'package:lumberkit/src/widgets/lumber_icon_list.dart';
+import 'package:lumberkit/src/models/lumber_icon_list.dart';
 
 class LumberIconPicker extends StatefulWidget {
   final LumberIconData? initialValue;
