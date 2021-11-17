@@ -21,4 +21,11 @@ extension CapitalizedStringExtension on String {
     // Join/Merge all words back to one String
     return capitalizedWords.join(' ');
   }
+
+  String before(String substring) {
+    if (this.contains(substring)) {
+      return this.substring(0, this.indexOf(substring));
+    }
+    return this;
+  }
 }
