@@ -1,4 +1,27 @@
+import 'package:http/http.dart' as http;
+
 extension CapitalizedStringExtension on String {
+  String? extension() {
+    int dotIndex = this.lastIndexOf('.');
+    if (dotIndex == -1) {
+      return null;
+    }
+    return this.substring(dotIndex + 1);
+  }
+
+  String? basename() {
+    int dotIndex = this.lastIndexOf('.');
+    if (dotIndex == -1) {
+      return this;
+    }
+    return this.substring(0, dotIndex);
+  }
+
+  Future<bool> urlExists() async {
+    final response = await http.head(Uri(path: this));
+    return (response.statusCode == 200);
+  }
+
   String toTitleCase() {
     if (this.length <= 1) {
       return this.toUpperCase();

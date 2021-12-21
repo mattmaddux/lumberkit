@@ -26,6 +26,7 @@ class LumberField extends StatelessWidget {
   final double? height;
   final double? borderRadius;
   final TextAlign? textAlign;
+  final bool autocorrect;
   final EdgeInsetsGeometry? externalPadding;
   final EdgeInsetsGeometry? internalPadding;
 
@@ -57,6 +58,7 @@ class LumberField extends StatelessWidget {
     this.externalPadding,
     this.internalPadding,
     this.textAlign,
+    this.autocorrect = true,
   }) : super(key: key);
 
   @override
@@ -97,6 +99,7 @@ class LumberField extends StatelessWidget {
               keyboardType: keyboardType,
               obscureText: obscure,
               cursorColor: activeColor,
+              autocorrect: autocorrect,
               decoration: InputDecoration(
                 prefixIcon: icon != null ? Icon(icon) : null,
                 hintText: label,

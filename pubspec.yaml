@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  http: ^0.13.4
   loading_indicator: ^2.1.1
   nanoid: ^1.0.0
   font_awesome_flutter:
