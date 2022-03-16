@@ -60,6 +60,12 @@ class _LumberTextButton extends State<LumberTextButton>
       ..addListener(() => setState(() {}));
   }
 
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
+  }
+
   Widget getChild(BuildContext context) {
     if (widget.loading) {
       return Container(
